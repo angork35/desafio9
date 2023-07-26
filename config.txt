@@ -1,0 +1,4 @@
+# Configuración de la aplicación de registro de eventos
+
+# Nombre del evento
+NOMBRE_EVENTO=Evento de Ejemplo 2023
