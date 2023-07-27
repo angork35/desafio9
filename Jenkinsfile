@@ -10,15 +10,13 @@ pipeline {
         stage('Declarative: Checkout SCM') {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'USER_GITHUB', usernameVariable: 'GITHUB_USERNAME', passwordVariable: 'GITHUB_PASSWORD')]) {
-                    script {
-                        checkout([$class: 'GitSCM',
-                            branches: [[name: '*/main']],
-                            doGenerateSubmoduleConfigurations: false,
-                            extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: '']],
-                            submoduleCfg: [],
-                            userRemoteConfigs: [[credentialsId: 'USER_GITHUB', url: 'https://github.com/angork35/desafio9.git']]
-                        ])
-                    }
+                    checkout([$class: 'GitSCM',
+                        branches: [[name: '*/main']],
+                        doGenerateSubmoduleConfigurations: false,
+                        extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: '']],
+                        submoduleCfg: [],
+                        userRemoteConfigs: [[credentialsId: 'USER_GITHUB', url: 'https://github.com/angork35/desafio9.git']]
+                    ])
                 }
             }
         }
