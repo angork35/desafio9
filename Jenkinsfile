@@ -10,7 +10,15 @@ pipeline {
     stages {
         stage('Declarative: Checkout SCM') {
             steps {
-                // ... (resto del código para checkout de Git)
+                withCredentials([usernamePassword(credentialsId: 'USER_GITHUB', usernameVariable: 'GITHUB_USERNAME', passwordVariable: 'GITHUB_PASSWORD')]) {
+                    checkout([$class: 'GitSCM',
+                        branches: [[name: '*/main']],
+                        doGenerateSubmoduleConfigurations: false,
+                        extensions: [[$class: 'RelativeTargetDirectory', relativeTargetDir: '']],
+                        submoduleCfg: [],
+                        userRemoteConfigs: [[credentialsId: 'USER_GITHUB', url: 'https://github.com/angork35/desafio9.git']]
+                    ])
+                }
             }
         }
 
@@ -22,17 +30,27 @@ pipeline {
             }
         }
 
-        // ... (resto del código para las etapas Run Container y Test)
+        stage('Run Container') {
+            steps {
+                sh 'docker run -d -p 5000:5000 --name my_app ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                sh 'docker exec my_app curl http://localhost:5000'
+            }
+        }
 
         stage('Push to DockerHub') {
             steps {
                 script {
                     // Tagueo de la imagen con la etiqueta correcta para DockerHub
-                    bat "docker tag ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} icarrera93/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"
+                    sh "docker tag ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} angork/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"
                     // Inicio de sesión en DockerHub con las credenciales
                     withDockerRegistry(credentialsId: "${DOCKERHUB_CREDENTIALS}", url: "https://index.docker.io/v1/") {
                         // Push de la imagen tagueada a DockerHub
-                        bat "docker push icarrera93/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"
+                        sh "docker push angork/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"
                     }
                 }
             }
