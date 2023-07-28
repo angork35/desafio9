@@ -4,7 +4,6 @@ pipeline {
     environment {
         DOCKER_IMAGE_NAME = 'angork/desafio9'
         DOCKER_IMAGE_TAG = '1.1'
-        DOCKERHUB_CREDENTIALS = 'USER_DOCKERHUB' // Debe coincidir con el ID de las credenciales en Jenkins
     }
 
     stages {
@@ -44,13 +43,11 @@ pipeline {
 
         stage('Push to DockerHub') {
             steps {
-                script {
-                    // Tagueo de la imagen con la etiqueta correcta para DockerHub
-                    sh "docker tag ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} angork/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"
-                    // Inicio de sesión en DockerHub con las credenciales
-                    withDockerRegistry(credentialsId: "${DOCKERHUB_CREDENTIALS}", url: "https://index.docker.io/v1/") {
-                        // Push de la imagen tagueada a DockerHub
-                        sh "docker push angork/${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG}"
+                withCredentials([string(credentialsId: '9cbfd706-ac58-42c6-8896-b663b81eecca', variable: 'DOCKER_TOKEN')]) {
+                    script {
+                        docker.withRegistry('', 'dockerhub') {
+                            dockerImage.push()
+                        }
                     }
                 }
             }
